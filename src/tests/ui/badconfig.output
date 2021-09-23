@@ -1,0 +1,8 @@
+error: cannot parse configuration file.
+
+   --> config.yaml
+    |
+  6 |   - matchers: [ { type: dir } ]
+    |                         ^^^^^^^
+
+columns[0].matchers[0].type: unknown variant `dir`, expected one of `blockdev`, `chardev`, `directory`, `executable`, `file`, `fifo`, `socket`, `symlink` at line 6 column 25

@@ -1,0 +1,38 @@
+[package]
+name = "summer"
+version = "0.1.0"
+edition = "2018"
+authors = [ "ayosec@gmail.com" ]
+license = "Apache-2.0"
+description = "Summer (TODO)"
+repository = "https://github.com/ayosec/summer"
+
+[dependencies]
+ansi_term = "0.12"
+atty = "0.2"
+colorparse = { version = "2", git = "https://github.com/ayosec/colorparse.git", branch = "update-deps" }
+dirs = "3.0"
+globset = "0.4"
+humantime = "2.1"
+lscolors = "0.7"
+memchr = "2"
+regex = "1.5"
+serde = { version = "1", features = ["derive"] }
+serde_yaml = "0"
+terminal_size = "0.1"
+threadpool = "1.8"
+unicode-width = "0.1"
+xflags = "0.2"
+
+[build-dependencies]
+flate2 = "1.0"
+quote = "1"
+roxmltree = "0.14"
+
+[dev-dependencies]
+tempdir = "0.3"
+
+[profile.release]
+codegen-units = 1
+incremental = false
+lto = true

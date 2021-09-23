@@ -1,0 +1,6 @@
+*.output diff=cat-e whitespace=-trailing-space,-blank-at-eof,-space-before-tab
+
+# To enable the cat-e diff driver:
+#
+#    [diff "cat-e"]
+#        textconv = cat -e
