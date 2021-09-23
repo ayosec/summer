@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2018"
 authors = [ "ayosec@gmail.com" ]
 license = "Apache-2.0"
-description = "Summer (TODO)"
+description = "CLI application to summarize the contents of a directory."
 repository = "https://github.com/ayosec/summer"
 
 [dependencies]
