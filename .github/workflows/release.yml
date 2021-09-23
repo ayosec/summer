@@ -1,0 +1,109 @@
+name: Release Assets
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release_draft:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Draft ${{ github.ref }}
+          draft: true
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+
+  build:
+    name: Package for ${{ matrix.image }}
+    needs: release_draft
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - debian
+          - fedora
+          - macos
+          - opensuse/leap
+          - tarball
+          - ubuntu
+          - windows
+
+        include:
+          - image: macos
+            os: macos-latest
+          - image: windows
+            os: windows-latest
+
+    runs-on: "${{ matrix.os || 'ubuntu-latest' }}"
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Update bash.
+        if: "runner.os == 'macOS'"
+        run: |
+          set -ex
+          brew update
+          brew install bash
+          bash --version
+
+      - name: Install Rust.
+        if: "runner.os != 'Linux'"
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+
+      - name: Package.
+        if: "runner.os == 'Linux'"
+        run: |
+          set -xe
+
+          IMAGE="${{ matrix.image }}"
+          if [ "$IMAGE" = tarball ]
+          then
+            IMAGE=debian:stable
+            MAKE_TARBALL=1
+          fi
+
+          docker run --rm                        \
+            -v "$PWD:/source"                    \
+            -e MAKE_TARBALL="${MAKE_TARBALL:-0}" \
+            -w /source                           \
+            "$IMAGE"                             \
+            pkg/build-release.sh
+
+      - name: Package.
+        if: "runner.os != 'Linux'"
+        run: |
+          set -xe
+          bash pkg/build-release.sh
+
+      - name: Upload asset.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPLOAD_URL: ${{ needs.release_draft.outputs.upload_url }}
+        run: |
+          set -ex
+          for ASSET in ASSETS/*
+          do
+            ASSET_NAME=$(basename "$ASSET")
+            curl                                          \
+              -X POST                                     \
+              -H "Authorization: token $GITHUB_TOKEN"     \
+              -H "Content-Type: application/octet-stream" \
+              --data-binary @"$ASSET"                     \
+              "${UPLOAD_URL/{*}?name=$ASSET_NAME"
+          done
