@@ -1,0 +1,56 @@
+# This example configuration uses features around Git.
+
+colors:
+  column_label: bold ul
+  more_entries: italic magenta
+  name_ellipsis: red
+
+  styles:
+    # Highlight the .git directory.
+    - matchers:
+      - all:
+        - type: directory
+        - glob: .git
+      color: white blue
+
+    # Add a yellow diamond for files modified in the last day.
+    - matchers: [ changes: 1 day ]
+      indicator:
+        text: ◆
+        color: yellow
+
+columns:
+  - label: Git
+    include_hidden: true
+    matchers: [ changes: git ]
+
+  - label: Dirs
+    matchers: [ type: directory ]
+
+  - label: Files
+    matchers: [any ]
+    include_hidden: true
+    exclude: [ glob: "*.swp" ]
+
+grid:
+  max_rows: 30
+  max_name_width: 20
+
+info:
+  variables:
+    # Count how many files have changes in git.
+    files_git: [ changes: git ]
+
+  # Left header: just the path to the directory.
+  left: "\n%C{magenta}%P"
+
+  # Right header: a summary of the git-diff stats.
+  right:
+    color: "black #eeeeee"
+    text: "\n %C{green}+%+%C{reset} %C{red}+%-%C{reset} in %C{bold}%V{files_git}%C{reset} files \n"
+
+collector:
+  # Wait up to two seconds to get disk usage and git-diff stats.
+  timeout: 2s
+  disk_usage: true
+  git_diff: true

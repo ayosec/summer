@@ -1,0 +1,147 @@
+# Configuration file for Summer.
+#
+# This is a reference file. Use it to build your own settings.
+
+# List of columns to build the summary of the directory.
+#
+columns:
+  - matchers: [ any ]
+
+  # If `false`, always ignore hidden files,
+  # include_hidden: false
+
+  # Label for the column.
+  #
+  # label (optional):
+
+  # Maximum width of the column. Overrides the value at `grid.max_name_width`.
+  #
+  # max_name_width:
+
+  # List of matchers for files to include in the column. The file is included in
+  # the column is any of the matchers is successful.
+  #
+  # Valid matchers:
+  #
+  #  - any                  Matches any file
+  #  - all: []              Matches a file if all matchers are successful.
+  #  - changes: "git"       Matches a file if it has changes since the last
+  #                         commit in a Git repository.
+  #  - changes: "duration"  Matches a file if it has modified in the time
+  #                         specified by "duration"
+  #  - glob: []             Matches using a pattern or a list of patterns.
+  #  - mime: "type"         Matches by MIME types (according to file name
+  #                         extension).
+  #  - regex: "re"          Matches a file name against a regular expression.
+  #  - type: "type"         Matches by file type. "type" can be any of blockdev,
+  #                         chardev, directory, executable, file, fifo, socket,
+  #                         or symlink.
+  #
+  # matchers: []
+
+  # Filters to exclude files from this column. Use the same options from the
+  # `matchers` key.
+  #
+  # exclude: []
+
+  # Styles to apply to all files in this column.
+  #
+  # color:
+
+  # If `true`, files with changes in the Git repository will appear before other
+  # files.
+  #
+  # git_changes_first: true
+
+  # Indicates how to sort rows in this column. The first word is the sort key,
+  # which can be one of name, size, modification_time, or version. The second
+  # (optional) word can be either "asc" or "desc".
+  #
+  # sort: "name asc"
+
+# info:
+  # Content for the left side of the header. Can be a single string, or ab
+  # object with `text` and `color` fields.
+  #
+  # The following specifiers can be used in the content:
+  #
+  #    %%      Literal '%'.
+  #    %P      Path.
+  #    %S      Disk usage.
+  #    %+      Added lines (from git diff).
+  #    %-      Deleted lines (from git diff).
+  #    %C{…}   Color.
+  #    %V{…}   Variable.
+  #
+  # left:
+
+  # Like the `left` field, but for the right side of the header.
+  #
+  # right:
+
+  # Like `left`, but adding the content as an extra column.
+  #
+  # column:
+
+  # A map to define variables to be used with %V{…}. Every variable defines a
+  # list of matchers, and its value is the number of files that match any of the
+  # matchers.
+  #
+  # variables:
+
+# colors:
+  # Coloring: auto, always, never.
+  # when: auto
+
+  # `true` if $LS_COLORS should be used to define colors for files.
+  #
+  # If its value is a string, it defines the environment variable to read.
+  # use_lscolors: true
+
+  # Style for the column labels.
+  # column_label: bold
+
+  # Style for the ellipsis printed when a file name is truncated.
+  # name_ellipsis: red
+
+  # Style for the "+X entries" row when a column is truncated.
+  # more_entries: italic
+
+  # Style for the number of added lines to a file.
+  # diff_added: green
+
+  # Style for the number of deleted lines to a file.
+  # diff_deleted: red
+
+  # List of styles for file patterns.
+  # styles:
+  #   - matchers: []
+  #     color: (optional) ""
+  #     indicator: (optional)
+  #       text:
+  #       color:
+
+  # List of file paths to load more styles.
+  # style_files: []
+
+# grid:
+  # Maximum number of rows for any column. If a column contains more rows, its
+  # content is truncated.
+  # max_rows: 1
+
+  # Maximum width (in terminal columns) for the file names. If a file name
+  # exceeds this width, it is truncated.
+  # max_name_width: 1
+
+  # Spaces between each column.
+  # column_padding: 4
+
+# collector:
+  # `true` if Summer must compute the disk used by subdirectories.
+  # disk_usage: true
+
+  # `true` if Summer must read diff stats from git.
+  # git_diff: true
+
+  # Timeout for the collector processes.
+  # timeout: 500 ms

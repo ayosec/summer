@@ -1,0 +1,61 @@
+# Configuration example using file types.
+
+colors:
+  use_lscolors: no
+  column_label: ul cyan
+
+  styles:
+    # Directories.
+    - matchers: [ type: directory ]
+      indicator: 📁
+      color: blue
+
+    # Executable files.
+    - matchers: [ type: executable ]
+      indicator: 💡
+      color: green
+
+    # Hidden files.
+    - matchers: [ regex: '^\.' ]
+      color: "#999999"
+
+    # Hidden directories.
+    - matchers: [ all: [ type: directory, regex: '^\.' ] ]
+      color: "#555588"
+
+columns:
+  - label: Dirs
+    matchers: [ type: directory ]
+    include_hidden: true
+
+  - label: Text
+    matchers:
+    - regex: '\A[A-Z0-9]+\z'
+    - mime: text
+
+  - label: Media
+    matchers: [ mime: audio, mime: image, mime: video ]
+
+  - label: Others
+    matchers: [ any ]
+    include_hidden: true
+    exclude:
+      - glob: '*.swp'
+
+info:
+  right: "%C{magenta}%P"
+
+  column: |-
+    %C{red}%V{dirs}%C{reset} directories
+    %C{red}%S%C{reset} in %C{red}%V{files}%C{reset} files
+    %C{red}%V{hidden}%C{reset} hidden
+
+    %C{red}%V{images}%C{reset} media files
+    %C{red}%V{text}%C{reset} text files
+
+  variables:
+    dirs: [ type: directory ]
+    files: [ type: file ]
+    hidden: [ regex: '\A\.' ]
+    images: [ mime: audio, mime: image, mime: video ]
+    text: [ mime: text ]
