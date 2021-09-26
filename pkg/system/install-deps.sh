@@ -34,11 +34,7 @@ then
     git             \
     rpm-build
 
-elif command -v choco
-then
-  choco install zip
-
-elif [ "$(uname -s)" = Darwin ]
+elif [ "$(uname -s)" != Linux ]
 then
   :
 

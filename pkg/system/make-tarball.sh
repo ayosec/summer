@@ -26,7 +26,7 @@ makepkg() {
   if [ "$OS" = Windows ]
   then
     file="$ASSETS_PATH/windows--$PACKAGE_NAME-$PACKAGE_VERSION$suffix.zip"
-    zip "$file" "$BINARY_PATH"
+    7z a "$file" "$BINARY_PATH"
   else
     file="$ASSETS_PATH/$OS--$PACKAGE_NAME-$PACKAGE_VERSION$suffix.tar.gz"
     tar -czf "$file" "$BINARY_PATH"
