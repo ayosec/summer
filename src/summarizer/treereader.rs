@@ -1,5 +1,7 @@
-//! This module implements a collector to compute the disk usage by a directory
-//! tree.
+//! This module implements a process to read data from directory trees:
+//!
+//! * Disk usage.
+//! * Newest modification time.
 //!
 //! The computed size is the length of the files, instead of the actual disk
 //! usage (in blocks). This is similar to `du --apparent-size`.
