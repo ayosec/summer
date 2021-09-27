@@ -19,7 +19,8 @@ pub use mimetypes::MimeType;
 #[cfg_attr(test, derive(Debug, PartialEq))]
 #[serde(deny_unknown_fields)]
 pub struct Root {
-    pub colors: Option<Colors>,
+    #[serde(default)]
+    pub colors: Colors,
 
     #[serde(default)]
     pub grid: Grid,
@@ -33,7 +34,7 @@ pub struct Root {
     pub collector: Collector,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 #[cfg_attr(test, derive(Debug, PartialEq))]
 #[serde(deny_unknown_fields)]
 pub struct Colors {
@@ -308,7 +309,7 @@ fn default_true() -> bool {
 impl Default for Root {
     fn default() -> Self {
         Root {
-            colors: None,
+            colors: Colors::default(),
             grid: Grid::default(),
             collector: Collector::default(),
             info: None,

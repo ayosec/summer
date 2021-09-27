@@ -18,22 +18,22 @@ pub fn load(path: impl AsRef<Path>) -> Result<config::Root, LoaderError> {
     let mut root: config::Root = load_file(path.as_ref())?;
 
     // Load styles from the colors.style_files list.
-    if let Some(colors) = &mut root.colors {
-        // Paths are relative to the parent of the main
-        // configuration file.
-        let parent = match path.as_ref().parent() {
-            Some(p) => p,
-            None => return Ok(root),
-        };
+    //
+    // Paths are relative to the parent of the main
+    // configuration file.
 
-        for style_file in mem::take(&mut colors.style_files) {
-            let path = parent.join(style_file);
-            let styles: Vec<config::Style> = load_file(&path)?;
+    let parent = match path.as_ref().parent() {
+        Some(p) => p,
+        None => return Ok(root),
+    };
 
-            colors.styles.reserve(styles.len());
-            for style in styles {
-                colors.styles.push(style);
-            }
+    for style_file in mem::take(&mut root.colors.style_files) {
+        let path = parent.join(style_file);
+        let styles: Vec<config::Style> = load_file(&path)?;
+
+        root.colors.styles.reserve(styles.len());
+        for style in styles {
+            root.colors.styles.push(style);
         }
     }
 
@@ -197,7 +197,7 @@ fn include_style_files() {
     .unwrap();
 
     // Load the files, and check the data.
-    let styles = load(&main).unwrap().colors.unwrap().styles;
+    let styles = load(&main).unwrap().colors.styles;
 
     for (n, color) in "red green blue yellow".split_whitespace().enumerate() {
         assert_eq!(

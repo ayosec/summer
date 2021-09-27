@@ -6,6 +6,7 @@
 * Add `not` matcher.
 * Add `deep_mtime` sort key, to sort directories using the newest file in the hierarchy.
 * Fix issue with the `glob` matcher when the pattern does not starts with `*`.
+* Fix default value for `colors.use_lscolors`. Now, it is `true` if `colors` is omitted.
 
 # 0.1 - 2021-09-23
 

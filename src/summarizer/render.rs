@@ -104,24 +104,21 @@ fn render_group(
 
     let mut disk_usage_column = extra_column!(|file| file.tree_info.is_some());
 
-    let lscolors = config
-        .colors
-        .as_ref()
-        .and_then(|colors| match &colors.use_lscolors {
+    let lscolors = {
+        let var_name = match &config.colors.use_lscolors {
             config::LsColors::Bool(false) => None,
             config::LsColors::Bool(true) => Some("LS_COLORS"),
             config::LsColors::VarName(var) => Some(&var[..]),
-        })
-        .and_then(|name| env::var(name).ok())
-        .map(|l| lscolors::LsColors::from_string(&l));
+        };
+
+        var_name
+            .and_then(|name| env::var(name).ok())
+            .map(|l| lscolors::LsColors::from_string(&l))
+    };
 
     macro_rules! color {
         ($key:ident) => {
-            config
-                .colors
-                .as_ref()
-                .and_then(|colors| colors.$key.as_ref())
-                .map(|color| color.style)
+            config.colors.$key.as_ref().map(|color| color.style)
         };
     }
 
@@ -190,25 +187,23 @@ fn render_group(
             }
         }
 
-        if let Some(ref colors) = config.colors {
-            for style in &colors.styles {
-                if super::matchers::is_match(
-                    path,
-                    &file.metadata,
-                    file.tree_info.as_ref(),
-                    file.git_changes.as_ref(),
-                    true,
-                    &style.matchers,
-                ) {
-                    if let Some(color) = &style.color {
-                        name_style = styles::combine(name_style, color.style);
-                    }
+        for style in &config.colors.styles {
+            if super::matchers::is_match(
+                path,
+                &file.metadata,
+                file.tree_info.as_ref(),
+                file.git_changes.as_ref(),
+                true,
+                &style.matchers,
+            ) {
+                if let Some(color) = &style.color {
+                    name_style = styles::combine(name_style, color.style);
+                }
 
-                    if let Some(i) = &style.indicator {
-                        has_indicators = true;
-                        let (text, style) = i.get();
-                        indicator.add_text(text, style);
-                    }
+                if let Some(i) = &style.indicator {
+                    has_indicators = true;
+                    let (text, style) = i.get();
+                    indicator.add_text(text, style);
                 }
             }
         }

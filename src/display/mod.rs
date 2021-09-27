@@ -96,7 +96,7 @@ fn print_columns(
         .max()
         .unwrap_or(0);
 
-    let use_colors = match config.colors.as_ref().and_then(|c| c.when.as_ref()) {
+    let use_colors = match config.colors.when {
         None | Some(ColorsWhen::Auto) => atty::is(atty::Stream::Stdout),
         Some(ColorsWhen::Never) => false,
         Some(ColorsWhen::Always) => true,
