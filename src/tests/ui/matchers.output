@@ -1,6 +1,6 @@
 dir0    fifo      a    0.a      00.9    x.ogg    x.png    c              d0    e0
 dir1    socket    b    1.a              x.ogv    y.png    c0             d1    e1
                        ABC0Z            y.ogg    z.png    c1                     
-                                        y.ogv             config.yaml            
-                                        z.ogg             y000z                  
+                       y000z            y.ogv             config.yaml            
+                                        z.ogg                                    
                                         z.ogv                                    

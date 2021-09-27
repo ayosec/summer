@@ -49,11 +49,12 @@ pub(super) fn analyze_path<'a>(
         }
 
         let git_changes = diff_stats.as_ref().and_then(|c| c.get(&file_name));
+        let file_name_path = Path::new(&file_name);
 
         // Find variables to track this entry.
         if let Some(info) = &config.info {
             for (var_name, matchers) in &info.variables {
-                if matchers::is_match(&path, &metadata, git_changes, true, matchers) {
+                if matchers::is_match(file_name_path, &metadata, git_changes, true, matchers) {
                     *variables.entry(&**var_name).or_default() += 1;
                 }
             }
@@ -61,12 +62,18 @@ pub(super) fn analyze_path<'a>(
 
         // Find a group for this directory entry.
         for group in &mut groups {
-            if matchers::is_match(&path, &metadata, git_changes, true, &group.column.exclude) {
+            if matchers::is_match(
+                file_name_path,
+                &metadata,
+                git_changes,
+                true,
+                &group.column.exclude,
+            ) {
                 continue;
             }
 
             if matchers::is_match(
-                &path,
+                file_name_path,
                 &metadata,
                 git_changes,
                 group.column.include_hidden,

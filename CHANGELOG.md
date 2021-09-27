@@ -4,6 +4,7 @@
 
 * Add `mtime` as an alias of the `modification_time` sorting key.
 * Add `not` matcher.
+* Fix issue with the `glob` matcher when the pattern does not starts with `*`.
 
 # 0.1 - 2021-09-23
 
