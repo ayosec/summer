@@ -2,6 +2,7 @@
 
 # 0.2 - ?
 
+* Add `mtime` as an alias of the `modification_time` sorting key.
 * Add `not` matcher.
 
 # 0.1 - 2021-09-23

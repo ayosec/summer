@@ -146,8 +146,12 @@ pub struct SortSpec(pub SortKey, pub SortOrder);
 #[serde(rename_all = "snake_case")]
 pub enum SortKey {
     Name,
+
     Size,
+
+    #[serde(alias = "mtime")]
     ModificationTime,
+
     Version,
 }
 

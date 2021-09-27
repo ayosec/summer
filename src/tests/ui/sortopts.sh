@@ -39,6 +39,7 @@ printf '   ' > A20
 
 runsort name
 runsort size
+runsort mtime
 runsort modification_time
 runsort version
 runsort version desc

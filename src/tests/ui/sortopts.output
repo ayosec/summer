@@ -60,6 +60,37 @@ A20    A13
        B2        
        B3        
        +7 entries
+SORT = mtime
+B20    A5        
+A10    B2        
+A20    B12       
+B10    A4        
+       A1        
+       A11       
+       A12       
+       A13       
+       A14       
+       A16       
+       A17       
+       A18       
+       A19       
+       A2        
+       A3        
+       A6        
+       A7        
+       A8        
+       A9        
+       B1        
+       B11       
+       B13       
+       B14       
+       B15       
+       B16       
+       B17       
+       B18       
+       B19       
+       B3        
+       +7 entries
 SORT = modification_time
 B20    A5        
 A10    B2        
