@@ -5,7 +5,9 @@ use std::fs;
 use std::path::Path;
 use std::time::SystemTime;
 
+use super::exts::mtime;
 use super::gitdiff::Change;
+use super::treereader::TreeInfoJob;
 use crate::config::{Changes, FileType, Matcher, MimeType};
 
 /// Returns `true` if the file matches any of the items in `matchers`.
@@ -14,6 +16,7 @@ use crate::config::{Changes, FileType, Matcher, MimeType};
 pub(super) fn is_match<'a>(
     path: &Path,
     metadata: &fs::Metadata,
+    tree_info: Option<&TreeInfoJob>,
     change: Option<&Change>,
     include_hidden: bool,
     matchers: impl IntoIterator<Item = &'a Matcher>,
@@ -37,7 +40,7 @@ pub(super) fn is_match<'a>(
             Matcher::All(matchers) => {
                 if matchers
                     .iter()
-                    .all(|m| is_match(path, metadata, change, include_hidden, [m]))
+                    .all(|m| is_match(path, metadata, tree_info, change, include_hidden, [m]))
                 {
                     return true;
                 }
@@ -51,14 +54,17 @@ pub(super) fn is_match<'a>(
                 }
 
                 Changes::Duration(limit) => {
-                    let newer = metadata
-                        .modified()
-                        .ok()
-                        .and_then(|m| SystemTime::now().duration_since(m).ok())
-                        .map(|d| d < *limit)
-                        .unwrap_or(false);
+                    let mtime = tree_info
+                        .and_then(|ti| ti.get())
+                        .map(|ti| ti.mtime)
+                        .unwrap_or_else(|| mtime(metadata));
 
-                    if newer {
+                    let now = SystemTime::now()
+                        .duration_since(SystemTime::UNIX_EPOCH)
+                        .map(|d| d.as_secs() - limit.as_secs())
+                        .unwrap_or(0);
+
+                    if mtime >= now {
                         return true;
                     }
                 }
@@ -82,7 +88,7 @@ pub(super) fn is_match<'a>(
             }
 
             Matcher::Not(m) => {
-                if !is_match(path, metadata, change, include_hidden, [&**m]) {
+                if !is_match(path, metadata, tree_info, change, include_hidden, [&**m]) {
                     return true;
                 }
             }

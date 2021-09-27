@@ -195,6 +195,7 @@ fn render_group(
                 if super::matchers::is_match(
                     path,
                     &file.metadata,
+                    file.tree_info.as_ref(),
                     file.git_changes.as_ref(),
                     true,
                     &style.matchers,
