@@ -184,3 +184,10 @@ A10    B16
        A9        
        A8        
        +7 entries
+SORT = deep_mtime
+0 c          
+  x          
+0 a          
+0 b          
+0 d          
+  config.yaml

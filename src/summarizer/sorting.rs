@@ -7,7 +7,9 @@
 //! [`sort`]: self::sort
 //! [`FilesGroup`]: super::FilesGroup
 
+use super::exts::mtime;
 use crate::config::{SortKey, SortOrder, SortSpec};
+
 use std::cmp::Ordering;
 use std::ffi::OsStr;
 use std::ops::RangeInclusive;
@@ -54,13 +56,26 @@ pub(super) fn sort(group: &mut super::FilesGroup) {
     }
 
     match sort_key {
+        SortKey::DeepModificationTime => {
+            sort!(f => (
+                    f.tree_info
+                        .as_ref()
+                        .and_then(|ti| ti.get())
+                        .map(|ti| ti.mtime)
+                        .unwrap_or_else(|| mtime(&f.metadata)),
+                    &f.file_name
+                )
+            )
+        }
+
         SortKey::Name => sort!(f => &f.file_name),
 
         SortKey::Size => {
             sort!(f => (
-                f.disk_usage
+                f.tree_info
                     .as_ref()
-                    .and_then(|du| du.get())
+                    .and_then(|ti| ti.get())
+                    .map(|ti| ti.disk_usage)
                     .unwrap_or_else(|| f.metadata.len()),
                 &f.file_name)
             )
@@ -80,26 +95,6 @@ pub(super) fn sort(group: &mut super::FilesGroup) {
 
     if sort_desc {
         group.files.reverse();
-    }
-}
-
-/// Returns the modification time from the file.
-fn mtime(metadata: &std::fs::Metadata) -> u64 {
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::MetadataExt;
-        metadata.mtime() as u64
-    }
-
-    #[cfg(not(unix))]
-    {
-        use std::time::SystemTime;
-        metadata
-            .modified()
-            .ok()
-            .and_then(|m| m.duration_since(SystemTime::UNIX_EPOCH).ok())
-            .map(|d| d.as_secs())
-            .unwrap_or(0)
     }
 }
 

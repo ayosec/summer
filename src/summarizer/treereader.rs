@@ -11,11 +11,12 @@
 //! (like `du -x`).
 
 use std::cell::RefCell;
-use std::fs;
 use std::path::Path;
 use std::sync::mpsc;
 use std::time::Instant;
+use std::{cmp, fs};
 
+use super::exts::mtime;
 use crate::config;
 use threadpool::ThreadPool;
 
@@ -24,23 +25,31 @@ use std::os::linux::fs::MetadataExt;
 
 /// Collector to compute disk usage for a path.
 #[derive(Default)]
-pub(super) struct DiskUsageCollector {
+pub(super) struct TreeReader {
     deadline: Option<Instant>,
     threadpool: ThreadPool,
 }
 
-/// Results of the disk usage computation.
+/// Results from the [`TreeReader`]
+#[derive(Clone, Copy, Default)]
 #[cfg_attr(test, derive(Debug))]
-pub struct DiskUsage(RefCell<DiskUsageInner>);
-
-#[cfg_attr(test, derive(Debug))]
-enum DiskUsageInner {
-    Working(Option<Instant>, mpsc::Receiver<Option<u64>>),
-    Done(Option<u64>),
+pub(super) struct TreeInfo {
+    pub disk_usage: u64,
+    pub mtime: u64,
 }
 
-impl DiskUsageCollector {
-    pub fn new(config: &config::Root) -> Option<DiskUsageCollector> {
+/// Results of the disk usage computation.
+#[cfg_attr(test, derive(Debug))]
+pub(super) struct TreeInfoJob(RefCell<TreeInfoInner>);
+
+#[cfg_attr(test, derive(Debug))]
+enum TreeInfoInner {
+    Working(Option<Instant>, mpsc::Receiver<Option<TreeInfo>>),
+    Done(Option<TreeInfo>),
+}
+
+impl TreeReader {
+    pub fn new(config: &config::Root) -> Option<TreeReader> {
         if !config.collector.disk_usage {
             return None;
         }
@@ -53,20 +62,26 @@ impl DiskUsageCollector {
 
         let threadpool = threadpool::Builder::new().build();
 
-        Some(DiskUsageCollector {
+        Some(TreeReader {
             deadline,
             threadpool,
         })
     }
 
-    /// Compute the disk used by a directory in a background thread.
-    pub fn disk_usage(&self, path: &Path) -> DiskUsage {
-        DiskUsage::new(&self.threadpool, path, self.deadline)
+    /// Read data from the path in a background thread.
+    pub fn read_info(&self, path: &Path) -> TreeInfoJob {
+        TreeInfoJob::new(&self.threadpool, path, self.deadline)
     }
 }
 
-impl DiskUsage {
-    fn new(pool: &ThreadPool, path: &Path, deadline: Option<Instant>) -> DiskUsage {
+impl TreeInfo {
+    fn new(disk_usage: u64, mtime: u64) -> TreeInfo {
+        TreeInfo { disk_usage, mtime }
+    }
+}
+
+impl TreeInfoJob {
+    fn new(pool: &ThreadPool, path: &Path, deadline: Option<Instant>) -> TreeInfoJob {
         let (tx, rx) = mpsc::channel();
         let path = path.to_owned();
 
@@ -77,21 +92,21 @@ impl DiskUsage {
                 None
             };
 
-            let _ = tx.send(compute_disk_usage(&path, metadata));
+            let _ = tx.send(read_path(&path, metadata));
         });
 
-        DiskUsage(RefCell::new(DiskUsageInner::Working(deadline, rx)))
+        TreeInfoJob(RefCell::new(TreeInfoInner::Working(deadline, rx)))
     }
 
     /// Returns the disk usage computed by a background thread.
     ///
     /// If the value is still unavailable, it will wait until `deadline`.
-    pub fn get(&self) -> Option<u64> {
+    pub fn get(&self) -> Option<TreeInfo> {
         let mut inner = self.0.borrow_mut();
 
         let (deadline, rx) = match &mut *inner {
-            DiskUsageInner::Done(n) => return *n,
-            DiskUsageInner::Working(d, r) => (d, r),
+            TreeInfoInner::Done(n) => return *n,
+            TreeInfoInner::Working(d, r) => (d, r),
         };
 
         let timeout = deadline.map(|dl| dl.saturating_duration_since(Instant::now()));
@@ -100,39 +115,37 @@ impl DiskUsage {
             None => rx.recv().ok().flatten(),
         };
 
-        *inner = DiskUsageInner::Done(res);
+        *inner = TreeInfoInner::Done(res);
         res
     }
 }
 
-fn compute_disk_usage(path: &Path, metadata: Option<fs::Metadata>) -> Option<u64> {
+fn read_path(path: &Path, parent_metadata: Option<fs::Metadata>) -> Option<TreeInfo> {
     #[cfg(target_os = "linux")]
-    if path.metadata().map(|m| m.st_dev()).ok() != metadata.map(|m| m.st_dev()) {
+    if path.metadata().map(|m| m.st_dev()).ok() != parent_metadata.map(|m| m.st_dev()) {
         // Don't descend in directories in they are
         // in another filesystem.
         return None;
     }
 
     #[cfg(not(target_os = "linux"))]
-    let _ = metadata;
+    let _ = parent_metadata;
 
     let dir = match fs::read_dir(path) {
         Ok(d) => d,
         Err(_) => return None,
     };
 
-    let bytes = dir
-        .filter_map(|e| e.ok())
+    dir.filter_map(|e| e.ok())
         .filter_map(|e| e.metadata().ok().map(|m| (e, m)))
         .map(|(entry, metadata)| {
             if metadata.is_dir() {
-                compute_disk_usage(&entry.path(), Some(metadata))
+                read_path(&entry.path(), Some(metadata))
             } else {
-                Some(metadata.len())
+                Some(TreeInfo::new(metadata.len(), mtime(&metadata)))
             }
         })
         .flatten()
-        .sum();
-
-    Some(bytes)
+        .reduce(|a, b| TreeInfo::new(a.disk_usage + b.disk_usage, cmp::max(a.mtime, b.mtime)))
+        .or_else(|| Some(TreeInfo::default()))
 }

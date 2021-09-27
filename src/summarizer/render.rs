@@ -102,7 +102,7 @@ fn render_group(
         None => false,
     });
 
-    let mut disk_usage_column = extra_column!(|file| file.disk_usage.is_some());
+    let mut disk_usage_column = extra_column!(|file| file.tree_info.is_some());
 
     let lscolors = config
         .colors
@@ -170,8 +170,8 @@ fn render_group(
 
         if let Some(column) = disk_usage_column.as_mut() {
             let mut row = Row::new();
-            if let Some(du) = file.disk_usage.as_ref().and_then(|du| du.get()) {
-                row.add_text(format_size(du), None);
+            if let Some(ti) = file.tree_info.as_ref().and_then(|ti| ti.get()) {
+                row.add_text(format_size(ti.disk_usage), None);
             }
 
             column.push(row);

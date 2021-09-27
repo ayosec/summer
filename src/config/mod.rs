@@ -145,6 +145,9 @@ pub struct SortSpec(pub SortKey, pub SortOrder);
 #[cfg_attr(test, derive(Debug, PartialEq))]
 #[serde(rename_all = "snake_case")]
 pub enum SortKey {
+    #[serde(alias = "deep_mtime")]
+    DeepModificationTime,
+
     Name,
 
     Size,

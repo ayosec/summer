@@ -43,3 +43,32 @@ runsort mtime
 runsort modification_time
 runsort version
 runsort version desc
+
+
+#
+# Sort by deep_mtime
+
+mkdir deep_mtime
+cd deep_mtime
+
+mkdir -p a a/a b/b/b c/c/c/c d
+
+touch -d -5day c/c/c/c/x d/y
+touch -d -4day x a/y
+touch -d -3day a/a/x b/y
+touch -d -2day b/b/b/x
+touch -d -1day d/x
+
+printf "SORT = deep_mtime\n"
+
+cat > config.yaml <<EOF
+collector:
+  disk_usage: true
+  git_diff: false
+
+columns:
+  - matchers: [ any ]
+    sort: deep_mtime
+EOF
+
+$SUMMER -c config.yaml

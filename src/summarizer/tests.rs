@@ -138,7 +138,7 @@ fn collect_dir_data() {
 
         ($group:expr, $file:expr, disk_usage = $disk:expr, $(,$t:tt)*) => {
             assert_eq!(
-                groups[$group].files[$file].disk_usage.as_ref().unwrap().get(),
+                groups[$group].files[$file].tree_info.as_ref().unwrap().get().map(|ti| ti.disk_usage),
                 Some($disk)
             );
 

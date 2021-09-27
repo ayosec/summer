@@ -11,7 +11,7 @@ use std::collections::HashMap;
 use std::path::Path;
 use std::{fs, io};
 
-use super::diskusage::DiskUsageCollector;
+use super::treereader::TreeReader;
 use super::{gitdiff, matchers, sorting};
 use super::{Analysis, File, FilesGroup};
 
@@ -23,7 +23,7 @@ pub(super) fn analyze_path<'a>(
     let mut variables = HashMap::new();
 
     // Run the collectors to get git and disk usage data.
-    let ducollector = DiskUsageCollector::new(config);
+    let tree_reader = TreeReader::new(config);
     let diff_stats = gitdiff::collect(path, config);
 
     let mut disk_usage_files = 0;
@@ -79,9 +79,9 @@ pub(super) fn analyze_path<'a>(
                 group.column.include_hidden,
                 &group.column.matchers,
             ) {
-                let disk_usage = ducollector.as_ref().and_then(|duc| {
+                let tree_info = tree_reader.as_ref().and_then(|duc| {
                     if metadata.is_dir() {
-                        Some(duc.disk_usage(&path))
+                        Some(duc.read_info(&path))
                     } else {
                         None
                     }
@@ -90,7 +90,7 @@ pub(super) fn analyze_path<'a>(
                 group.files.push(File {
                     file_name,
                     metadata,
-                    disk_usage,
+                    tree_info,
                     git_changes: git_changes.copied(),
                 });
 

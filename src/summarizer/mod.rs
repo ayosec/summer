@@ -10,12 +10,13 @@ use std::path::{Path, PathBuf};
 use std::{fs, io};
 
 mod analyzer;
-mod diskusage;
+mod exts;
 mod gitdiff;
 mod info;
 mod matchers;
 mod render;
 mod sorting;
+mod treereader;
 
 #[cfg(test)]
 mod tests;
@@ -51,5 +52,5 @@ struct File {
     file_name: OsString,
     metadata: fs::Metadata,
     git_changes: Option<gitdiff::Change>,
-    disk_usage: Option<diskusage::DiskUsage>,
+    tree_info: Option<treereader::TreeInfoJob>,
 }

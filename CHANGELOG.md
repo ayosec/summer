@@ -2,8 +2,9 @@
 
 # 0.2 - ?
 
-* Add `mtime` as an alias of the `modification_time` sorting key.
+* Add `mtime` as an alias of the `modification_time` sort key.
 * Add `not` matcher.
+* Add `deep_mtime` sort key, to sort directories using the newest file in the hierarchy.
 * Fix issue with the `glob` matcher when the pattern does not starts with `*`.
 
 # 0.1 - 2021-09-23
