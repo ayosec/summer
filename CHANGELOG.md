@@ -5,6 +5,7 @@
 * Add `mtime` as an alias of the `modification_time` sort key.
 * Add `not` matcher.
 * Add `deep_mtime` sort key, to sort directories using the newest file in the hierarchy.
+* Add `colors.disk_usage` to set the style for the disk usage column.
 * Fix issue with the `glob` matcher when the pattern does not starts with `*`.
 * Fix default value for `colors.use_lscolors`. Now, it is `true` if `colors` is omitted.
 

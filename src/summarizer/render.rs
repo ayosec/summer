@@ -168,7 +168,7 @@ fn render_group(
         if let Some(column) = disk_usage_column.as_mut() {
             let mut row = Row::new();
             if let Some(ti) = file.tree_info.as_ref().and_then(|ti| ti.get()) {
-                row.add_text(format_size(ti.disk_usage), None);
+                row.add_text(format_size(ti.disk_usage), color!(disk_usage));
             }
 
             column.push(row);

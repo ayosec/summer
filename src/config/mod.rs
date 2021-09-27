@@ -45,6 +45,8 @@ pub struct Colors {
 
     pub column_label: Option<Color>,
 
+    pub disk_usage: Option<Color>,
+
     pub name_ellipsis: Option<Color>,
 
     pub more_entries: Option<Color>,

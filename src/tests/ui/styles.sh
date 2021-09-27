@@ -16,6 +16,7 @@ colors:
   diff_added: white green
   diff_deleted: white red
   name_ellipsis: bold red
+  disk_usage: magenta
 
   styles:
     - indicator: "X "
