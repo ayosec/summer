@@ -81,6 +81,12 @@ pub(super) fn is_match<'a>(
                 }
             }
 
+            Matcher::Not(m) => {
+                if !is_match(path, metadata, change, include_hidden, [&**m]) {
+                    return true;
+                }
+            }
+
             Matcher::Regex(regex) => {
                 if let Some(n) = path.file_name().and_then(|n| n.to_str()) {
                     if regex.0.is_match(n) {

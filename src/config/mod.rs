@@ -168,6 +168,7 @@ pub enum Matcher {
     Changes(Changes),
     Glob(Glob),
     Mime(MimeType),
+    Not(Box<Matcher>),
     Regex(Regex),
     Type(FileType),
 }

@@ -12,7 +12,7 @@ collector:
 columns:
   - matchers: [ { type: directory } ]
   - matchers: [ { type: fifo }, { type: socket }, { type: symlink } ]
-  - matchers: [ all: [ { type: file }, { type: executable } ] ]
+  - matchers: [ all: [ type: file, type: executable, not: { glob: "*c" }  ] ]
   - matchers: [ { glob: [ "*.a", "y*z" ] }, { regex: '\A[A-Z0-9]+\z' } ]
   - matchers:
     - all:
@@ -29,8 +29,8 @@ EOF
 mkdir dir0 dir1
 
 # Executables.
-touch a b
-chmod +x a b
+touch a b c
+chmod +x a b c
 
 # Recent changes.
 touch -d -10hours c0 c1

@@ -1,5 +1,9 @@
 # summer
 
+# 0.2 - ?
+
+* Add `not` matcher.
+
 # 0.1 - 2021-09-23
 
 * Configuration is loaded from YAML files.
