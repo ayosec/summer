@@ -8,6 +8,7 @@
 * Add `colors.disk_usage` to set the style for the disk usage column.
 * Fix issue with the `glob` matcher when the pattern does not starts with `*`.
 * Fix default value for `colors.use_lscolors`. Now, it is `true` if `colors` is omitted.
+* Fix error messages when the configuration file contains many multibyte characters.
 
 # 0.1 - 2021-09-23
 

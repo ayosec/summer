@@ -5,9 +5,9 @@
 //! will be parsed and loaded into the final configuration object.
 
 use std::fs::File;
-use std::io::{self, Read, Seek};
+use std::io::{self, BufRead, BufReader};
 use std::path::{Path, PathBuf};
-use std::{cmp, fmt, mem};
+use std::{fmt, mem};
 
 use crate::config;
 
@@ -45,7 +45,7 @@ where
     T: for<'a> serde::Deserialize<'a>,
 {
     let file = File::open(path)
-        .map(io::BufReader::new)
+        .map(BufReader::new)
         .map_err(|e| LoaderError::Io(path.to_owned(), e))?;
 
     serde_yaml::from_reader(file).map_err(|e| LoaderError::Parser(path.to_owned(), e))
@@ -83,12 +83,13 @@ fn display_yaml_error(
             path.display()
         )?;
 
-        if let Ok((line, offset)) = line_at_index(path, location.index()) {
+        if let Ok(Some(line)) = get_line(path, location.line()) {
+            let column = location.column() - 1;
             writeln!(fmt, "    |")?;
             writeln!(fmt, "{:3} | {}", location.line(), line)?;
 
-            write!(fmt, "    | {:1$}", "", offset)?;
-            for _ in 0..line.chars().count() - offset {
+            write!(fmt, "    | {:1$}", "", column)?;
+            for _ in 0..line.chars().count() - column {
                 fmt.write_str("^")?;
             }
 
@@ -101,52 +102,17 @@ fn display_yaml_error(
     }
 }
 
-/// Read the line found at the `index` position of the file.
-///
-/// It returns the line, and the offset to the column where `index` is found.
-///
-/// The `yaml_rust` crate returns the `index` as a character count, instead of
-/// bytes. If the file contains many multi-bytes characters, the line may be
-/// wrong. This is a trade-off to get good performance in most common cases.
-fn line_at_index(path: &Path, index: usize) -> io::Result<(String, usize)> {
+/// Reads one line from the file in `path`.
+fn get_line(path: &Path, line: usize) -> io::Result<Option<String>> {
     // Ignore non-file paths.
     if !path.metadata()?.is_file() {
         return Err(io::Error::new(io::ErrorKind::Unsupported, "not a file"));
     }
 
-    // Read only 512 bytes around the position of the error, and try to
-    // extract the line for the position.
-    const WINDOW_SIZE: usize = 512;
-
-    let mut file = File::open(path)?;
-    let file_size = file.seek(io::SeekFrom::End(0))? as usize;
-
-    let (seek, offset) = match index.checked_sub(WINDOW_SIZE / 2) {
-        Some(n) => (n as usize, WINDOW_SIZE / 2),
-        None => (0, index),
-    };
-
-    file.seek(io::SeekFrom::Start(seek as u64))?;
-
-    let window_size = cmp::min(file_size - seek, WINDOW_SIZE) as usize;
-    let mut buffer = vec![0; window_size];
-    file.read_exact(&mut buffer)?;
-
-    // Find the beginning and the end of the line at `index`.
-    let bol_offset = memchr::memrchr(b'\n', &buffer[..offset as usize])
-        .map(|i| i + 1)
-        .unwrap_or(0);
-
-    let eol_offset = memchr::memchr(b'\n', &buffer[bol_offset..])
-        .map(|i| i + bol_offset)
-        .unwrap_or(buffer.len());
-
-    let line = &buffer[bol_offset..eol_offset];
-
-    Ok((
-        String::from_utf8_lossy(line).into_owned(),
-        offset - bol_offset,
-    ))
+    BufReader::new(File::open(path)?)
+        .lines()
+        .nth(line - 1)
+        .transpose()
 }
 
 #[test]
