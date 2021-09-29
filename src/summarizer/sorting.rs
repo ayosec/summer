@@ -36,7 +36,7 @@ pub(super) fn sort(group: &mut super::FilesGroup) {
     }
 
     macro_rules! sort {
-        ($file:ident => $key:expr) => {
+        (|$file:ident| $key:expr) => {
             group.files.sort_unstable_by(|a, b| {
                 git_order!(a, b);
 
@@ -57,32 +57,31 @@ pub(super) fn sort(group: &mut super::FilesGroup) {
 
     match sort_key {
         SortKey::DeepModificationTime => {
-            sort!(f => (
-                    f.tree_info
-                        .as_ref()
-                        .and_then(|ti| ti.get())
-                        .map(|ti| ti.mtime)
-                        .unwrap_or_else(|| mtime(&f.metadata)),
-                    &f.file_name
-                )
-            )
+            sort!(|f| (
+                f.tree_info
+                    .as_ref()
+                    .and_then(|ti| ti.get())
+                    .map(|ti| ti.mtime)
+                    .unwrap_or_else(|| mtime(&f.metadata)),
+                &f.file_name
+            ))
         }
 
-        SortKey::Name => sort!(f => &f.file_name),
+        SortKey::Name => sort!(|f| &f.file_name),
 
         SortKey::Size => {
-            sort!(f => (
+            sort!(|f| (
                 f.tree_info
                     .as_ref()
                     .and_then(|ti| ti.get())
                     .map(|ti| ti.disk_usage)
                     .unwrap_or_else(|| f.metadata.len()),
-                &f.file_name)
-            )
+                &f.file_name
+            ))
         }
 
         SortKey::ModificationTime => {
-            sort!(f => (mtime(&f.metadata), &f.file_name))
+            sort!(|f| (mtime(&f.metadata), &f.file_name))
         }
 
         SortKey::Version => {
