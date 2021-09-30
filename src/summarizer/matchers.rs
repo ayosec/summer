@@ -141,7 +141,7 @@ pub(super) fn is_match<'a>(
 #[cfg(unix)]
 fn is_hidden_file(name: &OsStr, _: &fs::Metadata) -> bool {
     use std::os::unix::ffi::OsStrExt;
-    matches!(name.as_bytes(), [b'.', ..])
+    name.as_bytes().starts_with(b".")
 }
 
 #[cfg(not(unix))]
