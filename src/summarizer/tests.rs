@@ -89,6 +89,7 @@ fn collect_dir_data() {
             let mut git = Command::new("git");
             git.current_dir(root.path())
                 .stdout(Stdio::null())
+                .args(["-c", "init.defaultBranch=x"])
                 .args(["-c", "user.name=ab"])
                 .args(["-c", "user.email=a@b"]);
 
@@ -100,7 +101,7 @@ fn collect_dir_data() {
         };
     }
 
-    run_git!("init -b x");
+    run_git!("init");
     run_git!("add .");
     run_git!("commit -m x");
 
