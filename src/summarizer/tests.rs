@@ -100,7 +100,7 @@ fn collect_dir_data() {
         };
     }
 
-    run_git!("init");
+    run_git!("init -b x");
     run_git!("add .");
     run_git!("commit -m x");
 

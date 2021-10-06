@@ -61,7 +61,7 @@ touch N{1..20}
 mkdir dir0 dir1
 fallocate -l100 dir0/x
 
-git init 1>&2
+git init -b x 1>&2
 seq 10 > X
 git add X
 git -c user.email=x -c user.name=x commit -m X 1>&2
