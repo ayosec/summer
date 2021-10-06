@@ -11,6 +11,7 @@
 //! ```notrust
 //! %%      literal '%'
 //! %P      path
+//! %p      path, where '$HOME' is replaced with '~'.
 //! %S      disk usage
 //! %+      added lines (git)
 //! %-      deleted lines (git)
@@ -29,6 +30,7 @@ pub(super) enum Token<'a> {
     Style(Style),
     StyleReset,
     Path,
+    PathHome,
     DiskUsage,
     AddedLines,
     DeletedLines,
@@ -51,6 +53,7 @@ impl<'a> Parser<'a> {
 
         let (token, skip) = match format.chars().next()? {
             'P' => (Token::Path, 1),
+            'p' => (Token::PathHome, 1),
             'S' => (Token::DiskUsage, 1),
             '+' => (Token::AddedLines, 1),
             '-' => (Token::DeletedLines, 1),
@@ -137,10 +140,12 @@ fn parse_format_string() {
 
     // A string with all specifiers.
     parse!(
-        "%C{blue bold} %P : %S%+%-%C{reset}%C{red}%V{dirs} %%dirs",
+        "%C{blue bold} %P %p : %S%+%-%C{reset}%C{red}%V{dirs} %%dirs",
         Style(AtStyle::new().fg(Colour::Blue).bold()),
         Text(" "),
         Path,
+        Text(" "),
+        PathHome,
         Text(" : "),
         DiskUsage,
         AddedLines,

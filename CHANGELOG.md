@@ -6,6 +6,7 @@
 * Add `not` matcher.
 * Add `deep_mtime` sort key, to sort directories using the newest file in the hierarchy.
 * Add `colors.disk_usage` to set the style for the disk usage column.
+* Add `%p` to print the path, but replace `$HOME` with `~`.
 * Fix issue with the `glob` matcher when the pattern does not starts with `*`.
 * Fix default value for `colors.use_lscolors`. Now, it is `true` if `colors` is omitted.
 * Fix error messages when the configuration file contains many multibyte characters.

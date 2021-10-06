@@ -67,6 +67,7 @@ columns:
   #
   #    %%      Literal '%'.
   #    %P      Path.
+  #    %p      Path, and replace '$HOME' with '~'.
   #    %S      Disk usage.
   #    %+      Added lines (from git diff).
   #    %-      Deleted lines (from git diff).

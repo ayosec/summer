@@ -13,7 +13,7 @@ collector:
   git_diff: false
 
 info:
-  left: "%C{bold ul}PATH - %S"
+  left: "%C{bold ul}%p - %S"
 
   right:
     color: normal blue
@@ -35,7 +35,12 @@ columns:
   - matchers: [ any ]
 EOF
 
-touch a b c
-mkdir e f
+export HOME=$PWD
+mkdir data
+cd data
 
-COLUMNS=80 $SUMMER -c config.yaml
+touch a b
+mkdir e f
+fallocate -l 123 c
+
+COLUMNS=80 $SUMMER -c ../config.yaml

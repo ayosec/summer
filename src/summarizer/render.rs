@@ -311,6 +311,16 @@ fn render_info(analysis: &Analysis, info: &config::InfoContent) -> Column {
                 row.add_text(format!("{}", analysis.path.display()), style);
             }
 
+            Token::PathHome => {
+                let mut path = format!("{}", analysis.path.display());
+                if let Ok(home_value) = env::var("HOME") {
+                    if path.starts_with(&home_value) {
+                        path.replace_range(..home_value.len(), "~");
+                    }
+                }
+                row.add_text(path, style);
+            }
+
             Token::DiskUsage => {
                 row.add_text(format_size(analysis.disk_usage_files), style);
             }
