@@ -57,7 +57,7 @@ impl QuotedString<'_> {
     fn try_write_unquoted(&self, fmt: &mut fmt::Formatter) -> Result<bool, fmt::Error> {
         let bytes = self.string.as_bytes();
 
-        if !bytes.iter().all(|b| (20..128).contains(b)) {
+        if !bytes.iter().all(|b| (20..128).contains(b) && *b != b'\\') {
             return Ok(false);
         }
 
@@ -110,6 +110,9 @@ impl fmt::Display for QuotedString<'_> {
                     if chr < ' ' {
                         next_char!(4);
                         write!(fmt, "\\x{:02X}", chr as u32)?;
+                    } else if chr == '\\' {
+                        next_char!(2);
+                        fmt.write_str("\\\\")?;
                     } else {
                         next_char!(chr.width().unwrap_or(0));
                         write!(fmt, "{}", chr)?;
@@ -198,6 +201,8 @@ fn quote_strings() {
     check!(b"\xCE\xB1 \xEF\xBC", 0, "α \\xEF\\xBC");
     check!(b"\xCE\xB1 \xEF\xBC \xCE\xB1", 0, "α \\xEF\\xBC α");
     check!(b"a\n\0\x11b", 0, "a\\x0A\\x00\\x11b");
+
+    check!(b"a\\b", 0, "a\\\\b");
 
     check!(b"aaa", 3, "aaa");
     check!(b"bbbbb", 3, "bb", true);

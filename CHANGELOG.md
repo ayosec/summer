@@ -1,6 +1,10 @@
 # summer
 
-# 0.2 - ?
+# 0.3 -
+
+* Escape `\` characters in filenames.
+
+# 0.2 - 2021-10-06
 
 * Add `mtime` as an alias of the `modification_time` sort key.
 * Add `not` matcher.
